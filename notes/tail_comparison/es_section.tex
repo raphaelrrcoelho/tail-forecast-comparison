@@ -1,0 +1,103 @@
+Expected shortfall (ES) is not elicitable on its own, but the pair of
+value-at-risk (VaR) and ES is \citep{fissler2016higher}, and (VaR, ES)
+forecasts are compared through a strictly consistent scoring function for
+the pair \citep{nolde2017elicitability}. We work with returns $y$, whose
+lower tail is the loss tail, a level $\tau\in(0,1/2)$, and forecasts $(v,e)$
+with $e\le v<0$ for the $\tau$-quantile and the $\tau$-expected shortfall,
+scored by the FZ0 loss of \citet{patton2019dynamic},
+\begin{equation}
+ S(v,e;y)=-\frac{1}{\tau e}\ind(y\le v)(v-y)+\frac ve+\log(-e)-1 ,
+ \label{eq:fz0}
+\end{equation}
+the member of the class of \citet{fissler2016higher} whose differences are
+invariant to the scale of the returns. Write $\omega=1/(\tau|e|)$ for its
+tail slope and $d_t=S(v_{A,t},e_{A,t};y_t)-S(v_{B,t},e_{B,t};y_t)$.
+
+\begin{lemma}[Structure of FZ0 differences]
+\label{lem:fz0}
+Let $w(v,e)=v/e+\log(-e)$, $c_t=w(v_{A,t},e_{A,t})-w(v_{B,t},e_{B,t})$ and
+$D_t=d_t-c_t$. Then
+\begin{enumerate}
+\item $D_t=\omega_{A,t}(v_{A,t}-y_t)_+-\omega_{B,t}(v_{B,t}-y_t)_+$, which is zero
+ unless $y_t\le\max\{v_{A,t},v_{B,t}\}$;
+\item if $e_{A,t}\ge e_{B,t}$, so that $A$'s ES is the less conservative,
+ then $D_t\ge-\omega_{B,t}(v_{B,t}-v_{A,t})_+$, and if moreover
+ $e_{A,t}>e_{B,t}$, then $D_t\to\infty$ as $y_t\to-\infty$; the case
+ $e_{A,t}\le e_{B,t}$ is symmetric;
+\item $w$ is strictly increasing in $|v|$ and nondecreasing in $|e|$, so
+ $c_t\le0$ whenever $A$ is less conservative in both components,
+ $v_{A,t}\ge v_{B,t}$ and $e_{A,t}\ge e_{B,t}$, and $c_t<0$ if moreover
+ $v_{A,t}>v_{B,t}$.
+\end{enumerate}
+\end{lemma}
+
+As for intervals and quantiles, the score difference departs from a value
+known in advance only on exceedance days (item~1). Unlike them, it is
+unbounded on one side whenever the ES forecasts differ (item~2). The same holds for every strictly consistent score in the
+characterization of \citet{fissler2016higher}: the difference contains, for
+outcomes below both VaRs, a term proportional to $\{G_2(e_A)-G_2(e_B)\}\,y$
+with $G_2$ strictly increasing.
+
+\paragraph{What can be certified.}
+On days on which $A$'s ES is the less conservative, $d_t$ is bounded below,
+so Theorem~\ref{thm:valid} applies to the lower bound; but large positive
+deviations inflate its variance term. Flooring the outcome repairs this
+without an assumption: replacing an extreme return by a less extreme one
+can only lower $d_t$ on these days, so a lower bound computed from the
+floored differences remains a valid lower bound for the original ones. Let $\underline y_t\le\min\{v_{A,t},v_{B,t}\}$ be
+$\G_t$-measurable, and let $\tilde d_t$ be the score difference evaluated at
+$\max\{y_t,\underline y_t\}$, which lies in a predictable bounded range.
+
+\begin{proposition}[One-sided certification]
+\label{prop:es-one-sided}
+Let $\mathcal L=\{t:e_{A,t}\ge e_{B,t}\}$, a predictable set of days, and
+let $\Dbar^{\mathcal L}_n$ be the average of $\Delta_t=\E[d_t\mid\G_t]$ over
+the first $n$ days in $\mathcal L$. The lower bound $L_n$ of
+Section~\ref{sec:cs}, computed from $\tilde d_t$ on the days in $\mathcal L$,
+satisfies $\Pr(\exists n:\Dbar^{\mathcal L}_n<L_n)\le\delta/2$, with no
+assumption on the distribution of the returns. The same holds for the upper
+bound on the days in the complement of $\mathcal L$.
+\end{proposition}
+
+Thus one can show, without assumptions, that a forecaster whose ES is less
+conservative was worse on the days on which it was less conservative. The
+reverse cannot be shown without an assumption on the loss tail.
+
+\begin{proposition}[No test can certify the less conservative ES]
+\label{prop:es-impossible}
+Fix forecasts $(v_A,e_A)$ and $(v_B,e_B)$ with $e_A>e_B$, used on every
+day, and let the returns be i.i.d. Let $P_1$ be any law with a finite first
+moment under which $\E_{P_1}d<0$, so that $A$ is better. Let $\phi$ be any
+test based on $y_1,\ldots,y_T$ that rejects the hypothesis
+$\E d\ge0$ with probability at most $\delta$ under every law with a finite
+first moment for which that hypothesis holds. Then
+$P_1(\phi\text{ rejects})\le\delta$.
+\end{proposition}
+
+The proof mixes $P_1$ with a small probability $\varepsilon$ of a very
+large loss, which reverses the comparison while changing the law of the
+sample by at most $T\varepsilon$ in total variation; this is the
+obstruction of \citet{bahadur1956nonexistence}. Since the perturbation
+changes the probability of an exceedance by at most $\varepsilon$, the
+result holds even if the hypothesis is restricted to laws whose exceedance
+probabilities for both VaR forecasts lie in any given open neighbourhood of
+those under $P_1$, for instance laws under which both VaR forecasts are
+nearly calibrated.
+Certifying that a less conservative ES forecast is better therefore
+requires an assumption on the loss tail. Under a known lower bound on the
+returns, flooring the outcome at that bound changes nothing, the score
+difference has a predictable range on all days, and the results of
+Sections~\ref{sec:cs} and~\ref{sec:rates} apply.
+
+\paragraph{Rates and the Diebold--Mariano test.}
+Both carry over. With equal ES forecasts $e_A=e_B=e$ and $v_B=v_A-H$, the
+FZ0 difference is $\omega\{-\tau H+\min((v_A-y)_+,H)\}$, the construction of
+Theorem~\ref{thm:lower} scaled by $\omega=1/(\tau|e|)$, so separating the forecasters
+requires at least $(1-\tau)\{H/(|e|\Delta)\}^2\log\{1/(4\delta)\}$
+expected exceedances, where $H/|e|$ is the distance between the VaR
+forecasts relative to the ES. On a sample without exceedances the score
+difference equals $c_t$, which by item~3 of Lemma~\ref{lem:fz0} favours
+the forecaster that is less conservative in both components, strictly when
+its VaR is strictly less conservative. The proof of
+Proposition~\ref{prop:dm} then applies with $c_t$ in place of the width
+difference.

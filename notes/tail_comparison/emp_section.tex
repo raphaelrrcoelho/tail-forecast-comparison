@@ -1,0 +1,107 @@
+\paragraph{Data.}
+Online conformal methods provide many interval forecasters with the same
+coverage target, which differ mainly in how they track the tails; they are
+a natural test bed for comparisons at small $\alpha$. We use seven public
+series: the oil temperature of an electricity
+transformer, hourly (ETTh1) and every 15 minutes (ETTm1)
+\citep{zhou2021informer}; the occupancy rate of one road sensor, hourly, and
+one daily exchange rate \citep{lai2018modeling}; German--Luxembourg
+day-ahead electricity prices, hourly, from Open Power System Data
+\citep{wiese2019open}; and the first twenty series of the M4 hourly
+\citep{makridakis2020m4} and NN5 daily \citep{godahewa2021monash}
+collections, each concatenated into one series. After 50 warm-up rounds,
+which initialise the methods and are not evaluated, the evaluation periods
+have between 5{,}538 and 66{,}146 rounds; they are shorter at the 99\%
+level, for the reason given below.
+
+\paragraph{Forecasters.}
+All methods share one point forecast and one scale. The point forecast
+$\mu_t$ for $y_t$ is the mean of five simple forecasters (naive, seasonal
+naive, rolling mean, simple exponential smoothing and a linear trend), each
+using data up to round $t-h$, where $h$ is the seasonal period (24 for
+hourly series, 96 for ETTm1, 7 for daily series). The scale $\sigma_t$ is
+the standard deviation of the last 50 observations, floored at 5\% of the
+series' standard deviation. Each method turns the standardized scores
+$|y_s-\mu_s|/\sigma_s$, $s<t$, into an interval
+$[\mu_t-\sigma_tq^-_t,\mu_t+\sigma_tq^+_t]$, so the intervals for round $t$
+depend on information up to round $t-1$ only and satisfy the conditions of
+Section~\ref{sec:setup}. The six methods are: adaptive conformal inference
+aggregated over step sizes, AgACI \citep{zaffran2022adaptive}; dynamically
+tuned adaptive conformal inference, DtACI \citep{gibbs2024conformal};
+strongly adaptive online conformal prediction, SAOCP
+\citep{bhatnagar2023improved}; quantile tracking (QT) and conformal PI
+control (PI) \citep{angelopoulos2023conformal}; and AgACI-W, introduced
+here, which aggregates adaptive conformal experts over several reference windows as
+well as step sizes, with the ML-Poly rule of \citet{gaillard2014second}. For the methods
+with a tuning parameter (the reference window of AgACI and DtACI, the
+learning rate of QT and PI) we keep the configuration with the lowest mean
+score on the evaluation period. The comparisons are therefore between the
+best members of each family, selected in sample, and we use them to compare
+the procedures rather than to rank the methods. At the 99\% level the
+candidate reference windows are longer, and because they need more
+history, the evaluation period of six series is 1{,}100 to 1{,}500 rounds
+shorter at that level.
+
+\paragraph{Procedures.}
+For each data set and level we compare all 15 pairs of methods. The
+Diebold--Mariano test is two-sided at 5\% with a Newey--West variance and
+lag $\max\{h-1,\lfloor4(T/100)^{2/9}\rfloor\}$. The confidence sequences use
+$\delta=0.05$. The EB sequence is the tuned one of Section~\ref{sec:cs},
+tuned on the first 10\% of the evaluation period. The Hoeffding sequence
+uses the uniform grid with $\lambda_0$ equal to the inverse of twice the
+median range over the 50 warm-up rounds that precede the evaluation
+period. We report whether each sequence excludes zero at
+the last round and, for every procedure, which method it favours. As a check that uses
+no model, we also split each evaluation period in halves, apply each
+procedure to the first half (the EB sequence tuned on the first 10\% of
+that half), and record whether the sign of its significant
+results agrees with the mean score difference on the second half.
+
+\paragraph{Results.}
+Table~\ref{tab:empirical} summarizes the 105 comparisons at each level.
+Misses, rounds on which at least one of the two intervals misses, make up
+about $1.3\alpha$ of all rounds,
+so at the 99\% level the median pair has 179 of them out of more than ten
+thousand. The share of
+pairs that each procedure separates falls with $\alpha$, fastest for the
+range-calibrated Hoeffding sequence, which separates 44\% of pairs at 80\%
+and none at 99\%, as Proposition~\ref{prop:hoeffding} predicts. The EB
+sequence separates 70\% at 80\% and 18\% at 99\%, and the Diebold--Mariano
+test declares 82\% and 54\% significant; the two never disagree in
+direction. The untuned EB sequence, with $\lambda_0$ from the 50 warm-up
+rounds as for the Hoeffding sequence, separates 59\% and 13\%.
+
+The conditions of Section~\ref{sec:rates} roughly hold. Realized miss
+rates have a median of $0.98\alpha$ to $1.00\alpha$ at every level (range
+$0.6\alpha$ to $4.1\alpha$), and over windows of $20/\alpha$ rounds their
+90th percentile has a median of about $1.1\alpha$ and is at most
+$5.1\alpha$, so the conditional constant $C$ is small. Endpoint distances,
+scaled by $\sigma_t$, have a 90th percentile about three times the median.
+The effect size $\Delta/H$ has a median of 0.35, 0.37, 0.36 and 0.50 at
+the four levels: it does not shrink with $\alpha$, so the $1/\alpha$ growth
+of the required number of rounds applies to these data.
+
+The split-sample check shows how reliable the significant results are. Of
+the
+Diebold--Mariano results that are significant on the first half, the share
+whose sign agrees with the second-half mean falls from 100\% at 80\% to
+97\%, 95\% and 90\% at 99\%. The sign of all 149 significant first-half
+results of the EB sequence agrees, although at 99\% it has 15 such results
+against 49 for the
+Diebold--Mariano test. Configurations were selected on the whole period, so
+the check is not fully out of sample.
+
+\begin{table}[t]
+\centering\small
+\caption{Comparisons of six online conformal methods on seven data sets,
+15 pairs each. Misses: rounds on which at least one interval misses,
+median per pair. Significant: the
+procedure separates the pair over the evaluation period (DM: two-sided
+5\%; EB: tuned 95\% confidence sequence; Hoeffding: 95\% Hoeffding-type
+sequence). First half:
+number of significant results on the first half of the evaluation period,
+and the share of those whose sign agrees with the mean on the second
+half.}
+\label{tab:empirical}
+\input{tab_empirical.tex}
+\end{table}

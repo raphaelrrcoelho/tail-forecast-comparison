@@ -1,0 +1,42 @@
+Dear Editor,
+
+Please consider the enclosed manuscript, "Comparing tail forecasts: the
+number of exceedances is the sample size", for publication in the Journal of
+Forecasting.
+
+Forecasters routinely rank competing tail forecasts by their scores: 99%
+prediction intervals for load and prices, extreme quantiles in epidemic
+forecasting and, under the market-risk rules, 97.5% value-at-risk and
+expected shortfall. The standard tool is the Diebold-Mariano test. The paper
+shows that such comparisons rest on the number of exceedances rather than
+the number of observations, and draws consequences that readers of the
+Journal of Forecasting can apply directly:
+
+1. How much data a comparison needs. A lower bound that holds for every
+   test, and a confidence sequence that attains it with no distributional
+   assumptions, valid when the comparison is monitored over time.
+2. When the Diebold-Mariano test can be trusted. With few exceedances it
+   favours the narrower or less conservative forecaster, whichever is
+   better; the usual small-sample corrections (Harvey-Leybourne-Newbold,
+   fixed-smoothing) do not fix this, while a bootstrap-t version largely
+   does. The paper gives a rule of thumb for the number of exceedances
+   below which normal critical values should not be used.
+3. Expected shortfall. A less conservative ES forecast can be shown to be
+   worse without assumptions, but never shown to be better without an
+   assumption on the loss tail.
+
+Two applications illustrate the results: online conformal prediction
+intervals on seven forecasting data sets, and (value-at-risk, expected
+shortfall) forecasts for seven stock indices. In 250-day backtesting
+windows, significant Diebold-Mariano results that favour the less
+conservative model contradict the ranking on the remaining days in 18.4% of
+cases, against 6.9% for those that favour the more conservative model.
+
+The manuscript is not under consideration elsewhere. Code that reproduces
+every result is provided as supporting information.
+
+Sincerely,
+Raphael Coelho
+Independent researcher, Brazil
+raphaelrrcoelho@gmail.com
+ORCID 0009-0001-6601-1023

@@ -1,0 +1,659 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,microtype}
+\usepackage{graphicx}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{condition}{Condition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\IS}{\mathrm{IS}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\rbar}{\bar r}
+\newcommand{\Dbar}{\bar\Delta}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\KL}{KL}
+
+\title{Comparing tail forecasts:\\the number of exceedances is the sample size}
+\author{Raphael Coelho\\ Independent researcher, Brazil\\
+\texttt{raphaelrrcoelho@gmail.com}\\ ORCID: 0009-0001-6601-1023}
+\date{}
+
+\setlength{\emergencystretch}{2em}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+When two forecasts of a tail, such as prediction intervals at high
+coverage, extreme quantiles or expected shortfall (ES), are compared by a
+consistent score, the score difference is known in advance except on the
+days on which the outcome falls beyond a forecast. The number of these
+exceedances, not the number of observations, is the effective sample size.
+For intervals at miscoverage level $\alpha$, the number of observations a
+comparison needs grows like $1/\alpha$ while the number of exceedances it
+needs does not, and for some pairs of forecasts no test can do better. A
+confidence sequence that is valid at all times and needs no distributional
+assumption attains this rate; Hoeffding-type procedures, calibrated by the
+range of the score difference, need $1/\alpha$ times more. When
+exceedances are scarce, the Diebold--Mariano test declares the less
+conservative forecaster better with at least, asymptotically, the
+probability of observing no exceedance, whichever forecaster is actually
+better; the usual small-sample corrections do not remove this, while a
+bootstrap-$t$ version largely does. For (value-at-risk, ES) forecasts, a
+less conservative ES can be shown without assumptions to be worse on the
+days on which it is less conservative, but never to be better without an
+assumption on the loss tail. In 250-day windows of 97.5\% forecasts for
+seven stock indices, 18.4\% of significant Diebold--Mariano results
+favouring the less conservative model contradict the ranking on the
+remaining days, against 6.9\% of those favouring the more conservative
+one.
+\end{abstract}
+
+\noindent\textbf{Keywords:} expected shortfall; interval score; quantile score;
+forecast comparison; Diebold--Mariano test; confidence sequences; comparative
+backtesting.
+
+\section{Introduction}
+\label{sec:intro}
+
+Forecasts of rare events are issued as prediction intervals with high
+nominal coverage, as quantiles at extreme levels, or as expected shortfall
+(ES): 99\% intervals for electricity load or prices, the outer quantiles of
+the weighted interval score used in epidemic forecasting
+\citep{bracher2021evaluating}, and value-at-risk (VaR) and ES at the 97.5\%
+level, on which market-risk capital rests \citep{bcbs2019minimum}.
+Competing forecasters are compared through consistent scores: the interval
+score \citep{winkler1972decision,gneiting2007strictly},
+\begin{equation}
+ \IS_\alpha(l,u;y)=(u-l)+\frac2\alpha(l-y)_++\frac2\alpha(y-u)_+,
+ \label{eq:is}
+\end{equation}
+the quantile (pinball) score $\rho_\tau(y-q)$ with
+$\rho_\tau(x)=x\{\tau-\ind(x<0)\}$, and, for ES jointly with VaR, the scores
+of \citet{fissler2016higher} used in comparative backtests
+\citep{nolde2017elicitability}. The usual tool is a test of equal
+predictive ability on the score differences
+\citep{diebold1995comparing,giacomini2006tests}, and practitioners know
+that tail scores are noisy: tail-quantile scores ``suffer from high variance
+due to the sparsity of observations'' \citep{browell2021probabilistic}.
+
+This paper makes that observation precise. When the outcome falls inside
+two intervals, their score difference equals the difference of their widths,
+which is known before the outcome; it departs from that value only on
+rounds in which an interval is missed (Lemma~\ref{lem:structure}). The same
+holds for quantiles and for (VaR, ES) pairs with exceedances in place of
+misses. Comparisons therefore rest on the exceedances. A 250-day
+backtesting window at the 97.5\% level contains about six if the VaR
+forecast is calibrated; a comparison of 99\% intervals over ten thousand
+rounds rests on little more than a hundred. We call a procedure
+\emph{anytime-valid} if its error guarantee holds simultaneously at all
+sample sizes, so that the comparison can be monitored after every round and
+stopped at any time.
+
+We make three contributions.
+\begin{enumerate}
+\item \emph{How much data a comparison needs} (Sections~\ref{sec:cs}
+and~\ref{sec:rates}). For some pairs of interval forecasts, every test
+needs a number of misses that does not shrink with $\alpha$, and hence a
+number of rounds that grows like $1/\alpha$, even for bounded outcomes. An
+empirical-Bernstein confidence sequence, valid at all times with no
+assumption on the outcomes, attains this rate up to constants and a
+logarithmic factor. Procedures calibrated by the range of the score
+difference need a factor of order $1/\alpha$ more.
+\item \emph{Why the Diebold--Mariano test misleads} (Section~\ref{sec:dm}).
+When misses are scarce it declares the narrower, or less conservative,
+forecaster significantly better, whichever forecaster is better, with
+probability at least, asymptotically, that of observing no miss; no test that
+controls its error can reject this often.
+\item \emph{What can be certified for ES} (Section~\ref{sec:es}). The score
+difference is unbounded on one side whenever two ES forecasts differ. A
+less conservative ES forecaster can be shown to be worse without
+assumptions; no test can show it to be better without an assumption on the
+loss tail.
+\end{enumerate}
+Simulations (Section~\ref{sec:sim}) confirm the rates and show the
+Diebold--Mariano test, its usual small-sample corrections and an asymptotic
+confidence sequence losing error control at small $\alpha$, while a
+bootstrap-$t$ version of the test largely keeps it. Two applications follow: six online conformal
+methods on seven forecasting data sets at levels from 80\% to 99\%
+(Section~\ref{sec:empirical}), and six (VaR, ES) models on seven stock
+indices (Section~\ref{sec:es-empirical}), where Diebold--Mariano tests in
+250-day windows mostly favour the less conservative model and then often
+contradict the ranking on the remaining days. Results stated for intervals
+hold for quantile scores at tail level $\tau$ with $\alpha$ replaced by
+$2\tau$, up to constants (Corollary~\ref{cor:interval-upper}); proofs
+are in the Appendix.
+
+\paragraph{Related work.}
+Tests of equal predictive ability are reviewed by \citet{diebold2015comparing};
+small-sample versions use the correction of
+\citet{harvey1997testing} or fixed-smoothing asymptotics
+\citep{coroneo2020comparing}, and the model confidence set
+\citep{hansen2011model} extends the comparison to many forecasters. All
+rely on a central limit theorem for the mean score difference, which
+Section~\ref{sec:dm} shows to fail when exceedances are scarce. Rankings
+by consistent scores can depend on the score chosen, which Murphy
+diagrams display \citep{ehm2016quantiles}, and evaluation conditioned on
+extreme outcomes is misleading \citep{lerch2017forecaster}; we fix the
+score and condition on nothing. For ES,
+\citet{fissler2016expected} and \citet{nolde2017elicitability} recommend
+comparative backtests and note that rankings at extreme levels need long
+samples.
+\citet{bauer2025evaluating} found by simulation that Diebold--Mariano tests
+of VaR and ES forecasts at the 1\% level have low power and wrong-sign
+rejections favouring the less conservative forecast;
+Proposition~\ref{prop:dm} gives a mechanism for the second finding.
+\citet{frederiksen2026heavy} study a different failure, score differences
+with infinite variance. \citet{jiao2025standard} construct comparative
+e-backtests for risk measures including ES under a known bound on losses;
+Proposition~\ref{prop:es-impossible} shows that some such assumption is
+unavoidable in one direction. Confidence sequences for means go back to the
+nonparametric constructions of \citet{howard2021time} and the betting
+approach of \citet{waudbysmith2024estimating}. Anytime-valid comparison of
+forecasters was developed by \citet{henzi2022valid} for binary outcomes and
+by
+\citet{choe2024comparing}, whose confidence sequences require bounded score
+differences or a known global bound; they leave unbounded outcomes open and
+suggest the asymptotic confidence sequences of \citet{waudbysmith2024time},
+which we find lose error control at small $\alpha$.
+\citet[Lemma~B.1]{arnold2026sequential} bound quantile-score differences by
+a predictable multiple of the distance between the quantiles;
+Lemma~\ref{lem:structure} is the interval-score version, with the
+additional point that the deviation from a predictable centre vanishes off
+the miss event. What is new here is the sample-complexity
+analysis (lower bound, matching upper bound, the $1/\alpha$ separation
+between variance- and range-calibrated procedures, and the
+Diebold--Mariano mechanism) and the ES asymmetry.
+
+\section{The structure of tail score differences}
+\label{sec:setup}
+
+Rounds are indexed by $t=1,2,\ldots$. Let $(\G_t)$ be a filtration in
+which $\G_t$ is the information available when the forecasts for round $t$
+are issued, and the outcome $y_t$ is $\G_{t+1}$-measurable. Two forecasters
+$A$ and $B$ issue $\G_t$-measurable finite intervals
+$I_{A,t}=[l_{A,t},u_{A,t}]$ and $I_{B,t}=[l_{B,t},u_{B,t}]$. Multi-step
+forecasts fit this framework as long as the intervals for round $t$ are
+issued before $y_t$ is observed. Lower scores are better, and we write
+\[
+ d_t=\IS_\alpha(I_{A,t};y_t)-\IS_\alpha(I_{B,t};y_t),\qquad
+ \Delta_t=\E[d_t\mid\G_t],\qquad
+ \Dbar_t=\frac1t\sum_{s=1}^t\Delta_s .
+\]
+The target $\Dbar_t$ is the average \emph{conditional} predictive ability
+\citep{giacomini2006tests,choe2024comparing}: $\Dbar_t>0$ means that $B$ has
+been better on average, round by round, given the information available
+just before each outcome.
+Let $H_t=\max\{|l_{A,t}-l_{B,t}|,|u_{A,t}-u_{B,t}|\}$ be the endpoint
+distance and $p_{A,t}=\Pr(y_t\notin I_{A,t}\mid\G_t)$, and similarly
+$p_{B,t}$, the conditional miscoverage probabilities. A \emph{miss} is a
+round on which the outcome falls outside at least one of the two
+intervals, $y_t\notin I_{A,t}\cap I_{B,t}$; when one interval contains the
+other, the misses are those of the narrower one. For quantile and (VaR, ES)
+forecasts we call the corresponding rounds \emph{exceedances}.
+
+\begin{lemma}[Structure of interval-score differences]
+\label{lem:structure}
+Let $c_t=(u_{A,t}-l_{A,t})-(u_{B,t}-l_{B,t})$ be the width difference, and
+\[
+ m_t^-=\min\{0,\;l_{A,t}-l_{B,t},\;u_{B,t}-u_{A,t}\},\qquad
+ m_t^+=\max\{0,\;l_{A,t}-l_{B,t},\;u_{B,t}-u_{A,t}\}.
+\]
+Then, for every value of $y_t$,
+\begin{enumerate}
+\item $d_t=c_t+(2/\alpha)f_t$, where $f_t$ is the distance from $y_t$ to
+ $I_{A,t}$ minus its distance to $I_{B,t}$, and $m_t^-\le f_t\le m_t^+$, so that
+ $a_t:=c_t+(2/\alpha)m_t^-\le d_t\le b_t:=c_t+(2/\alpha)m_t^+$;
+\item $|f_t|\le H_t$, and $m_t^+-m_t^-\le 2H_t$;
+\item $f_t=0$ if $y_t\in I_{A,t}\cap I_{B,t}$.
+\end{enumerate}
+The quantities $c_t$, $a_t$ and $b_t$ are $\G_t$-measurable. Consequently
+$\Var(d_t\mid\G_t)\le\E[(d_t-c_t)^2\mid\G_t]
+\le(4H_t^2/\alpha^2)\min\{1,p_{A,t}+p_{B,t}\}$.
+\end{lemma}
+
+When the intervals are nested, $I_{A,t}\subseteq I_{B,t}$, one has
+$m_t^-=0$, so $d_t\ge c_t$: the score difference can only rise above the
+width difference.
+
+\paragraph{Quantile scores.}
+For quantile forecasts $q_{A,t},q_{B,t}$ at a lower-tail level
+$\tau<1/2$, $\rho_\tau(y-q)=\tau(y-q)+(q-y)_+$ gives
+\begin{equation}
+ d_t=\rho_\tau(y_t-q_{A,t})-\rho_\tau(y_t-q_{B,t})
+ =\tau(q_{B,t}-q_{A,t})+\{(q_{A,t}-y_t)_+-(q_{B,t}-y_t)_+\}.
+ \label{eq:quantile}
+\end{equation}
+The braced term lies between $\min\{0,q_{A,t}-q_{B,t}\}$ and
+$\max\{0,q_{A,t}-q_{B,t}\}$ and vanishes unless
+$y_t<\max\{q_{A,t},q_{B,t}\}$, an event of conditional probability at most
+$\max\{p_{A,t},p_{B,t}\}$, where $p_{\cdot,t}=\Pr(y_t<q_{\cdot,t}\mid\G_t)$.
+Upper-tail levels are symmetric. Since
+$\IS_\alpha=(2/\alpha)\{\rho_{\alpha/2}(y-l)+\rho_{1-\alpha/2}(y-u)\}$,
+interval scores are sums of two such comparisons.
+
+\paragraph{A common condition.}
+Both cases are instances of the following structure, which is all the
+procedures below use.
+
+\begin{condition}[Predictable centre and range]
+\label{cond:range}
+There are $\G_t$-measurable $a_t\le c_t\le b_t$ with $a_t\le d_t\le b_t$.
+Write $D_t=d_t-c_t$, $R^-_t=c_t-a_t$ and $R^+_t=b_t-c_t$.
+\end{condition}
+
+For the rates we use two further quantities: a bound $\rbar$ with
+$R_t^\pm\le\rbar$, and a bound $\pi$ with $\Pr(D_t\neq0\mid\G_t)\le\pi$.
+Lemma~\ref{lem:structure} gives, for interval scores with $H_t\le H$ and
+$p_{A,t},p_{B,t}\le C\alpha$,
+\begin{equation}
+ \rbar=2H/\alpha,\qquad \pi=2C\alpha,\qquad
+ \E[D_t^2\mid\G_t]\le\rbar^2\pi=8CH^2/\alpha ,
+ \label{eq:interval-constants}
+\end{equation}
+and, for quantile scores at level $\tau$ with
+$|q_{A,t}-q_{B,t}|\le H$ and $p_{A,t},p_{B,t}\le C\tau$, $\rbar=H$ and
+$\pi=C\tau$.
+
+\section{An anytime-valid confidence sequence}
+\label{sec:cs}
+
+We now construct an empirical-Bernstein (EB) confidence sequence for
+$\Dbar_t$. The idea is to measure the score difference against the predictable centre
+$c_t$ and to estimate its variance only from the deviations $D_t$, which
+are zero on every round without a miss. For a candidate value $m$ of the
+average score difference and a tuning value $\lambda>0$, the quantity
+$\exp\{\lambda\sum_s(d_s-m)-V\}$ is the wealth of a gambler who bets, with
+stake $\lambda$, that the score differences exceed $m$, and $V$ is a
+penalty for their fluctuations; if the true average were $m$, this wealth
+could not grow large except with small probability. The lower bound $L_t$
+is the largest $m$ that can be rejected in this way, using several stakes
+at once and a one-dimensional root search. Formally, let
+$g(u)=\{-\log(1-u)-u\}/u^2$ for $u\in(0,1)$, with $g(0)=1/2$ and
+$g(u)=\infty$ for $u\ge1$; $g$ is increasing. Fix $\lambda_0>0$, set $\lambda_k=2^{-k}\lambda_0$ for
+$k=0,\ldots,K-1$, and fix $\delta\in(0,1)$. For each $k$ and $m\in\mathbb R$
+let
+\[
+ V_{k,t}=\lambda_k^2\sum_{s=1}^tg(\lambda_kR^-_s)D_s^2,\qquad
+ \Phi_t(m)=\frac1K\sum_{k=0}^{K-1}
+ \exp\Bigl\{\lambda_k\sum_{s=1}^t(d_s-m)-V_{k,t}\Bigr\},
+\]
+where a component is set to zero from the first round $s$ at which
+$\lambda_kR^-_s\ge1$. The function
+$\Phi_t$ is continuous and decreasing in $m$. Define the lower bound $L_t$ as
+the root of $\Phi_t(m)=2/\delta$ (or $-\infty$ if every component is zero),
+and the upper bound $U_t$ in the same way from $-d_t$, with the roles of
+$R^-_t$ and $R^+_t$ exchanged.
+
+\begin{theorem}[Validity]
+\label{thm:valid}
+Under Condition~\ref{cond:range} alone,
+\[
+ \Pr\bigl(\exists t\ge1:\;\Dbar_t\notin(L_t,U_t)\bigr)\le\delta .
+\]
+The same holds for any countable grid $(\lambda_k)$ with weights $w_k\ge0$,
+$\sum_kw_k\le1$, in place of the uniform weights $1/K$.
+\end{theorem}
+
+No moment, tail, coverage or endpoint-distance assumption enters: the
+ranges only need to be known before each outcome, and they are, because the
+intervals are. Each evaluation of $\Phi_t$ costs $O(K)$ once the running sums are
+updated, and the root is found by bisection. If $\lambda_0$, or the grid
+and weights, are computed from data observed up to some round $t_0$, the
+theorem applies conditionally on $\G_{t_0}$ to the rounds after $t_0$.
+
+\paragraph{Choosing the grid.}
+The uniform grid needs only the scale $\lambda_0$, which can be set from the
+ranges $R_t^\mp$ in a short warm-up segment before evaluation; we call the
+result the \emph{untuned} sequence, and Theorem~\ref{thm:upper} applies to
+it. When the number of rounds $n$ to be evaluated is known, the weights can
+instead concentrate on the $\lambda$ that suits it, about
+$\{2\log(4/\delta)/(nv)\}^{1/2}$, where $v$, the mean of $D_t^2$, is
+estimated on an initial tuning segment. The resulting \emph{tuned} sequence
+is valid for the rounds after that segment (Appendix~\ref{app:tuned}),
+which also lists the steps of its computation.
+When misses are rare, the ranges say little about $v$, and the uniform grid
+spends most of its weight on values of $\lambda$ far from the best one; the
+tuned sequence avoids this at the cost of the tuning segment.
+
+\section{How many rounds a comparison needs}
+\label{sec:rates}
+
+\subsection{Upper bound}
+
+\begin{theorem}[Detection time]
+\label{thm:upper}
+Assume Condition~\ref{cond:range}, $R_t^\pm\le\rbar$ and
+$\Pr(D_t\ne0\mid\G_t)\le\pi$ for all $t$. Let $\delta\le1/2$ and
+$t\ge4$, and suppose $\lambda_0\ge1/(4\rbar)$ and
+$2^{K-1}\ge\lambda_0\rbar\sqrt t$. Let
+$\beta\in(0,1)$ and $\ell=\log(2K/\delta)+\log(2/\beta)$. If
+$\Dbar_t\ge\Delta>0$ almost surely and
+\begin{equation}
+ t\ge\Bigl(96\,\frac{\rbar^2\pi}{\Delta^2}+22\,\frac{\rbar}{\Delta}\Bigr)\ell,
+ \label{eq:upper}
+\end{equation}
+then $\Pr(L_t>0)\ge1-\beta$.
+\end{theorem}
+
+Substituting
+\eqref{eq:interval-constants}:
+
+\begin{corollary}[Interval scores]
+\label{cor:interval-upper}
+If $H_t\le H$ and $p_{A,t},p_{B,t}\le C\alpha$ for all $t$, the confidence
+sequence separates the forecasters, $L_t>0$, with probability at least
+$1-\beta$ as soon as
+\[
+ t\ge\frac{\ell}{\alpha}\Bigl(768\,C\,\frac{H^2}{\Delta^2}+44\,\frac H\Delta\Bigr).
+\]
+At that round the expected number of misses, at most $2C\alpha t$, is of
+order $\ell C(CH^2/\Delta^2+H/\Delta)$, which does not depend on $\alpha$.
+For quantile scores at level $\tau$ with $|q_{A,t}-q_{B,t}|\le H$ and
+$p_{A,t},p_{B,t}\le C\tau$, the condition is
+$t\ge\ell(96C\tau H^2/\Delta^2+22H/\Delta)$, with $\Delta$ in units of the
+quantile score.
+\end{corollary}
+
+For interval scores $|\Delta_t|\le2H+(2/\alpha)H(p_{A,t}+p_{B,t})\le
+(2+4C)H$, so $H/\Delta\le(2+4C)H^2/\Delta^2$, and the required number
+of rounds is of order $(1+C)H^2\ell/(\alpha\Delta^2)$. The ratio $\Delta/H$ is a dimensionless effect
+size: the average score difference relative to how far apart the forecasts
+are.
+
+\subsection{Lower bound}
+
+\begin{theorem}[Lower bound for every test]
+\label{thm:lower}
+Let $\tau\in(0,1/2]$, $H>0$ and $0<\Delta\le\tau H$. There are fixed
+quantile forecasts $q_A<q_B=q_A+H$ at level $1-\tau$ and two
+distributions $P_0,P_1$ of an outcome with two support points such that, for
+i.i.d.\ outcomes:
+\begin{enumerate}
+\item the expected quantile-score difference is $0$ under $P_0$ and $\Delta$
+ under $P_1$;
+\item under both, each quantile is exceeded with probability at most
+ $2\tau$;
+\item every test based on $y_1,\ldots,y_T$ whose errors under $P_0$ and
+ $P_1$ are both at most $\delta<1/4$ requires
+ \[
+  T\ge\tau(1-\tau)\frac{H^2}{\Delta^2}\log\frac1{4\delta}.
+ \]
+\end{enumerate}
+For interval scores at level $\alpha=2\tau$, taking
+$I_A=[l,q_A]$ and $I_B=[l,q_B]$ with a common lower endpoint below both
+support points gives a pair with endpoint distance $H$, miscoverage at most
+$\alpha$, and expected interval-score differences $0$ and
+$\Delta_{\IS}=\Delta/\tau$, and the bound reads
+$T\ge2(1-\alpha/2)H^2\log\{1/(4\delta)\}/(\alpha\Delta_{\IS}^2)$.
+\end{theorem}
+
+The lower bound applies to anytime-valid procedures as well, since the
+event that a level-$\delta$ confidence sequence excludes zero by round $T$
+is a test. It matches Corollary~\ref{cor:interval-upper}: both are of order
+$H^2\log(1/\delta)/(\alpha\Delta_{\IS}^2)$. In expected misses of the narrower
+interval the bound is $(1-\tau)(H/\Delta_{\IS})^2\log\{1/(4\delta)\}$: no procedure
+can separate two forecasters before observing a number of misses of order
+$(H/\Delta_{\IS})^2\log(1/\delta)$, however many rounds that takes. The outcome
+laws in the construction are bounded; rarity, not heavy tails, is the
+obstacle.
+
+\subsection{Range-calibrated procedures}
+
+A Hoeffding-type confidence sequence uses the same predictable ranges but
+not the variance: by Hoeffding's lemma,
+$\exp\{\lambda\sum_s(d_s-\Delta_s)-\lambda^2\sum_s(b_s-a_s)^2/8\}$ is a
+supermartingale for each $\lambda\ge0$, and a mixture over $\lambda$ gives
+bounds $(L^{\rm H}_t,U^{\rm H}_t)$ in the same way as in
+Section~\ref{sec:cs}.
+
+\begin{proposition}
+\label{prop:hoeffding}
+If $b_s-a_s=r$ for all $s$, then for every grid and weights,
+$L^{\rm H}_t\le\bar d_t-r\sqrt{\log(2/\delta)/(2t)}$, where $\bar d_t$ is
+the average of $d_1,\ldots,d_t$. For nested intervals with
+$H_t=H$, $r=2H/\alpha$, so the radius exceeds $2\Delta$ while
+$t<H^2\log(2/\delta)/(2\alpha^2\Delta^2)$. If moreover the $d_t$ are
+i.i.d.\ with mean $\Delta>0$ and variance $\sigma^2$, then for such $t$,
+$\Pr(L^{\rm H}_t>0)\le\sigma^2/(t\Delta^2)$.
+\end{proposition}
+
+In the Gaussian example below, $\sigma^2/\Delta^2$ is of order $1/\alpha$,
+so the bound on $\Pr(L^{\rm H}_t>0)$ is of order $\alpha$ at the
+threshold, and the Hoeffding-type sequence needs of order
+$1/\alpha$ times more rounds than the confidence sequence of
+Section~\ref{sec:cs}.
+
+The variance of $d_t$ is of
+order $H^2/\alpha$ while its range is of order $H/\alpha$; the gap between
+the two is the gap between the number of misses and the number of rounds.
+
+\subsection{A Gaussian example}
+\label{sec:gauss}
+
+Let $y\sim N(0,1)$, let $z$ be its $(1-\alpha/2)$-quantile, and let $B$ be the exact
+central interval $[-z,z]$. Forecaster $A$ either narrows or widens it by
+$\eta/z$ at each end, with $\eta=1/2$. Then $H=\eta/z$, and
+$\Delta$ and $\Var(d)$ follow from one-dimensional integrals of the normal
+tail. As $\alpha\downarrow0$, $\Delta\asymp1/z$ and
+$\Var(d)\asymp1/(\alpha z^2)$, so $\Delta/H$ tends to a positive constant
+and $\Var(d)/\Delta^2\asymp1/\alpha$; for the widened interval, for
+example, $\Delta\sim2(\eta-1+e^{-\eta})/z$ and
+$\Var(d)\sim8\{1-(1+\eta)e^{-\eta}\}/(\alpha z^2)$. Section~\ref{sec:sim}
+shows both rates in this example.
+
+\section{The Diebold--Mariano test when misses are scarce}
+\label{sec:dm}
+
+The Diebold--Mariano statistic is
+$\mathrm{DM}_T=\sqrt T\bar d_T/\hat s_T$, where $\hat s_T^2$ is a
+(heteroskedasticity and autocorrelation consistent) estimate of the
+long-run variance of $d_t$, and the test of equal predictive ability
+rejects at level $\gamma$ when $|\mathrm{DM}_T|>z_{1-\gamma/2}$
+\citep{diebold1995comparing,newey1987simple}. Its justification is a central
+limit theorem for $\bar d_T$, which needs many misses.
+
+\begin{proposition}
+\label{prop:dm}
+Let $(\sigma_t,\varepsilon_t)$ be i.i.d., with $\sigma_t>0$ independent of
+$\varepsilon_t$, $\E\sigma_t^2<\infty$, and $y_t=\sigma_t\varepsilon_t$,
+where $\sigma_t$ is known when the forecasts are issued. Let
+$I_{A,t}=\sigma_t[-a,a]$ and $I_{B,t}=\sigma_t[-b,b]$ with $0<a<b$, both
+scored by $\IS_\alpha$, and let $p=\Pr(|\varepsilon_t|>a)$. Let $\hat s_T^2$
+be the sample variance or the Newey--West estimator with Bartlett weights,
+autocovariances with divisor $T$ and lag $o(T)$, and declare $A$ significantly better when
+$\mathrm{DM}_T<-z_{1-\gamma/2}$ (with $\mathrm{DM}_T=-\infty$ if
+$\bar d_T<0=\hat s_T$). Then
+\[
+ \Pr\bigl(\mathrm{DM}_T<-z_{1-\gamma/2}\bigr)\ge(1-p)^T\,q_T,
+\]
+where $q_T$ depends only on the law of $(\sigma_t)$, not on $a$, $b$ or
+the law of $\varepsilon_t$; $q_T\to1$ as $T\to\infty$, and $q_T=1$ if
+$\sigma_t$ is constant. In particular, if $a=a_T$ varies with $T$ so that
+$Tp_T\to\mu$, where $p_T=\Pr(|\varepsilon_t|>a_T)$, the probability is at
+least $e^{-\mu}-o(1)$, for every value of $\Dbar_T$, including the null
+value $0$ and values at which $A$ is worse.
+\end{proposition}
+
+With few misses, the score difference is dominated by the width
+difference, which always favours the narrower interval, and the variance
+estimate reflects only the variation in widths, so the statistic is large.
+Where Theorem~\ref{thm:lower} says that no procedure can decide, the test
+decides, in a direction fixed by the widths. The bound comes from the
+event $N_T$ that no round up to $T$ is missed, and it identifies the
+mechanism rather than its size: in the Gaussian design of
+Section~\ref{sec:sim} with $\alpha=0.01$ and $T=250$, $(1-p)^T$ is below
+0.1\%, while the test favours the narrower interval in 12\% of samples.
+With a handful of misses the variance estimate is still dominated by the
+width variation and by the few misses observed, and the distortion
+persists as long as the expected number of misses is small.
+
+\begin{proposition}[No valid test matches the Diebold--Mariano test]
+\label{prop:dm-valid}
+In the setting of Proposition~\ref{prop:dm} with $\sigma_t\equiv1$, let
+$P$ be any law of $\varepsilon_t$ with $p=\Pr_P(|\varepsilon_t|>a)\ge\alpha$.
+Let $\phi$ be any test based on $y_1,\ldots,y_T$ that declares $A$ better
+with probability at most $\delta$ under every i.i.d.\ law of
+$\varepsilon_t$ under which $A$ is not better. Then
+\[
+ \Pr_P(\phi\text{ declares }A\text{ better})\le\delta+1-(1-p)^T\le\delta+Tp,
+\]
+whereas the Diebold--Mariano test declares $A$ better with probability at
+least $(1-p)^T$, under $P$ and under a law under which $A$ is not better.
+\end{proposition}
+
+When the expected number of misses $Tp$ is small, every valid test is
+nearly powerless, while the Diebold--Mariano test rejects with probability
+close to one whatever the truth: its additional rejections are errors, not
+power. The condition $p\ge\alpha$ only asks that the narrower interval not
+over-cover. The proposition applies to any procedure that controls its
+error exactly, including the confidence sequence of Section~\ref{sec:cs};
+procedures whose error control is only asymptotic, such as the
+corrections studied in Section~\ref{sec:sim}, are not covered by it.
+
+\section{Expected shortfall}
+\label{sec:es}
+
+\input{es_section.tex}
+
+\section{Simulations}
+\label{sec:sim}
+
+\input{sim_section.tex}
+
+\section{Application: interval forecasts at levels from 80\% to 99\%}
+\label{sec:empirical}
+
+\input{emp_section.tex}
+
+\section{Application: expected shortfall for seven stock indices}
+\label{sec:es-empirical}
+
+\input{es_emp_section.tex}
+
+\section{Discussion}
+\label{sec:discussion}
+
+In tail forecast comparisons the effective sample size is the number of
+exceedances. Three practical recommendations follow. First, report the
+number of rounds on which the score difference departs from its predictable
+value; it is computable from the forecasts and the outcomes. Second, do not
+use normal critical values for the Diebold--Mariano test when this number
+is small: in our simulations, its error in favour of the narrower interval
+exceeded twice the nominal level in every design with fewer than 25
+expected misses of the narrower interval, and with heavy-tailed outcomes in
+some designs with up to 63. The corrections of \citet{harvey1997testing}
+and \citet{coroneo2020comparing} did not change this. A bootstrap-$t$
+version, resampling blocks of rounds when the score differences are
+dependent, kept its error near the nominal level in all but the smallest
+design, with power similar to that of the test with normal critical
+values, slightly lower for the widened interval. In the ES data it removed most of the
+tilt towards the less conservative model, although at the 99\% level its
+significant results in favour of that model were still the less reliable.
+It is the natural replacement when an asymptotic justification suffices. Third, when a guarantee that holds in
+finite samples, at all sample sizes and without distributional assumptions
+is needed, as when a comparison is monitored over time or its conclusion
+carries regulatory weight, use the confidence sequence of
+Section~\ref{sec:cs}, tuned to the planned horizon when one is known; in
+our simulations the price was two to three times as many rounds as the
+Diebold--Mariano test needs for the same power.
+
+For ES, 250-day windows hold too few exceedances for a ranking, and the
+Diebold--Mariano test with normal critical values fills the gap in favour
+of the less conservative model. Comparative backtests meant to reward a less conservative ES
+forecast should state the bound on the loss tail they assume.
+
+The conditions of Theorem~\ref{thm:upper} are needed for the rate, not for
+validity. If endpoint distances are heavy-tailed, as when intervals are
+scaled by a heavy-tailed volatility, the rate depends on the realized
+ranges, and the Diebold--Mariano statistic may itself have a non-Gaussian
+limit \citep{frederiksen2026heavy}. The results extend to the weighted
+interval score of epidemic forecasting \citep{bracher2021evaluating}, which
+is a sum of interval scores and satisfies Condition~\ref{cond:range} with
+the summed ranges.
+
+\section*{Data and code availability}
+The data sets are public; Section~\ref{sec:empirical} lists their sources,
+and the index prices of Section~\ref{sec:es-empirical} are daily closes from
+Yahoo Finance, downloaded on 27 October 2026; the downloaded prices are
+included with the code.
+Code that reproduces every number, table and figure is provided as
+Supporting Information.
+
+\section*{Conflict of interest}
+The author declares no conflict of interest.
+
+\section*{Funding}
+This research received no specific funding.
+
+\appendix
+
+\section{Proofs}
+\label{app:proofs}
+
+\input{proofs.tex}
+
+\section{The tuned sequence and its power}
+\label{app:tuned}
+
+The tuned sequence estimates $v$, the mean of $D_t^2$, and the 90th
+percentiles $r^\mp$ of $R_t^\mp$ on the tuning segment. For each side it
+sets $\lambda_*=\{2\log(4/\delta)/(nv)\}^{1/2}$, capped at $1/(2r^\mp)$,
+with $n$ the number of remaining rounds, and uses the grid
+$\lambda_*2^j$, $j=-10,\ldots,9$, with weight $1/2$ on $j=0$ and $1/38$ on
+each other point. For a component with weight $w$, the lower bound is at
+least $\bar d_t-\{\log(2/(\delta w))+V_{k,t}\}/(\lambda_kt)$, which is
+smallest near this $\lambda_*$ when $V_{k,t}\approx\lambda_k^2nv/2$.
+Validity follows from Theorem~\ref{thm:valid}, since the weights are fixed
+before the remaining rounds are observed; the target is the average of
+$\Delta_t$ over those rounds.
+
+In practice:
+\begin{enumerate}
+\item compute $d_t$, $c_t$, $a_t$ and $b_t$ for every round from the
+ forecasts and the outcomes (Lemma~\ref{lem:structure} for intervals,
+ \eqref{eq:quantile} for quantiles, Lemma~\ref{lem:fz0} for (VaR, ES));
+\item on the tuning segment, set $v$ to the mean of $D_t^2$ and $r^\mp$
+ to the 90th percentiles of $R_t^\mp$, and form the grid and weights above
+ for each side;
+\item on the remaining rounds, maintain $\sum_s d_s$ and, for each $k$,
+ $\sum_s g(\lambda_kR^\mp_s)D_s^2$, and find $L_t$ and $U_t$ by bisection
+ on $m$ in $\Phi_t(m)=2/\delta$;
+\item declare $B$ better once $L_t>0$, and $A$ better once $U_t<0$.
+\end{enumerate}
+The code accompanying the paper implements these steps.
+
+Table~\ref{tab:power} compares its power with that of the Diebold--Mariano
+test and its bootstrap-$t$ version in the Gaussian design of
+Section~\ref{sec:sim}.
+
+\begin{table}[h]
+\centering\small
+\caption{Power (\%) to declare the worse forecaster $A$ worse in the
+Gaussian design of Figure~\ref{fig:detection}, at horizons $T_{80}$,
+$2T_{80}$ and (for EB) $4T_{80}$, where $T_{80}$ gives the known-variance test 80\% power. DM:
+two-sided 5\% Diebold--Mariano test; boot: its bootstrap-$t$ version;
+EB: the tuned sequence, tuned on the first 10\% of the horizon. Neither
+DM nor boot declared $A$ better in any replication. 200 replications.}
+\label{tab:power}
+\input{tab_power.tex}
+\end{table}
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs}
+
+\end{document}

@@ -1,0 +1,103 @@
+\paragraph{Data and forecasts.}
+We use daily closing prices of seven equity indices (S\&P 500, FTSE 100,
+DAX, Nikkei 225, Euro Stoxx 50, Hang Seng and Bovespa) from January 2000 to
+September 2026, and percentage log returns. Six standard models produce
+one-day-ahead (VaR, ES) forecasts at $\tau=0.025$ and $\tau=0.01$, each
+using returns up to the previous day: historical simulation on the last 250
+and 500 returns (HS-250, HS-500); the exponentially weighted variance with
+decay factor 0.94 and normal quantiles (EWMA); GARCH(1,1) with normal (GARCH-N)
+and standardized Student-$t$ innovations (GARCH-t); and filtered historical
+simulation (FHS), which multiplies the GARCH-N volatility by the empirical
+quantile and tail mean of the standardized residuals. The GARCH models have
+zero mean and are re-estimated every 20 days on the last 1000 returns. After
+an estimation window of 1000 days and a further 250 days that fix the
+scale $\lambda_0$ of the untuned confidence sequence, the evaluation
+periods have between 3{,}638 and 5{,}541 days.
+
+\paragraph{Procedures.}
+For each index and level we compare the 15 pairs of models by the FZ0 loss.
+The Diebold--Mariano test is two-sided at 5\% with a Newey--West variance
+and lag $\lfloor4(T/100)^{2/9}\rfloor$. We apply it to the full evaluation
+period and to each non-overlapping window of 250 days, the length of the
+regulatory backtesting sample. In each window we record whether a
+significant result favours the model whose ES forecast was less
+conservative on average over the window, and whether its sign agrees with
+that of the mean loss difference over all other days of the evaluation
+period. The certification of Proposition~\ref{prop:es-one-sided} is applied
+on the days on which each model is the less conservative, with the outcome
+floored at $\underline y_t=\kappa\min\{e_{A,t},e_{B,t}\}$ and $\kappa=2$,
+that is, at twice the more conservative ES forecast; $\delta=0.05$, $K=20$,
+and on the full period the sequence is tuned on the first 10\% of the
+selected days. A tuning segment of 10\% of a 250-day window would contain
+less than one expected exceedance, so within windows we use the untuned
+sequence, with $\lambda_0$ from the 250 days that precede the evaluation
+period. The choice of $\kappa$ affects power but not validity; we also
+report $\kappa=1.5$ and $\kappa=3$.
+
+\paragraph{Results.}
+Table~\ref{tab:es} summarizes the results. A 250-day window contains a
+median of nine days on which the return falls below at least one of the two
+VaR forecasts at $\tau=0.025$, and four at $\tau=0.01$, against about six
+and 2.5 for one calibrated forecast, because two forecasts are involved and
+the models' exceedance rates, pooled over indices, are 1.0--1.4 times the
+nominal level at $\tau=0.025$ and 1.1--2.1 times at $\tau=0.01$. The Diebold--Mariano test
+is significant in 18\% of the window--pair tests at both levels, and 73\%
+(at $\tau=0.025$) and 80\% (at $\tau=0.01$) of the significant results
+favour the less conservative model. Over the full period, with a median of
+203 and 104 exceedances per pair, the corresponding shares are 67\% and
+51\%, counting a model as less conservative when its ES was the less
+conservative on most days. The tilt towards the less conservative model is
+thus modest at $\tau=0.025$, 73\% in windows against 67\% over the full
+period, and large at $\tau=0.01$, 80\% against 51\%, where windows hold
+the fewest exceedances. The significant window results that favour the less
+conservative model contradict the ranking on the other days in 18.4\% and
+21.1\% of cases; those that favour the more conservative model do so in
+6.9\% and 10.5\%.
+
+The window tests are dependent: the 15 pairs of an index share the returns,
+and windows of different indices overlap in time. To assess the sampling
+uncertainty of these shares, we assign each window to the calendar year of
+its midpoint and resample years with replacement, keeping every window of
+the drawn years (4000 resamples). The 95\% percentile interval for the
+difference between the two wrong-sign rates is $[1.7,19.7]$ percentage
+points at $\tau=0.025$ and $[0.0,18.9]$ at $\tau=0.01$; for the share of
+significant results that favour the less conservative model it is
+$[54,89]\%$ and $[67,90]\%$. The asymmetry is thus clear at
+$\tau=0.025$ and borderline at $\tau=0.01$, where significant results of
+either kind are fewer.
+
+Replacing the normal critical values of the Diebold--Mariano test by those
+of a circular block bootstrap-$t$ test (blocks of 10 days, 999 resamples,
+with the statistic and its replicates studentized by the variance of the
+block means) removes most of the tilt. The share of significant window
+tests is similar, 18\% and 20\%, but only 51\% and 60\% of them favour the
+less conservative model. Their wrong-sign rates are 12.9\% and 14.2\%,
+against 9.5\% and 6.3\% for those that favour the more conservative
+model, so at $\tau=0.01$ results
+in favour of the less conservative model remain the less reliable.
+
+The certification never succeeds within a window, as the lower bound of
+Section~\ref{sec:es} leads one to expect on four to nine exceedances. On
+the full period it certifies that the less conservative model was worse
+on its own days for 48\% of pairs at $\tau=0.025$ and 44\% at
+$\tau=0.01$. Across $\kappa\in\{1.5,2,3\}$ these shares range over 48--50\%
+and 42--44\%. The untuned sequence certifies 43\% and 24\%. When it certifies, the
+full-period
+Diebold--Mariano test is significant in the same direction in 48 of 50 and
+36 of 46 pairs, and never in the opposite direction.
+
+\begin{table}[t]
+\centering\small
+\caption{Comparisons of six (VaR, ES) models on seven equity indices,
+15 pairs each, by the FZ0 loss. Windows: non-overlapping 250-day windows.
+Exceedances: days on which the return falls below the larger VaR forecast.
+DM: two-sided 5\% Diebold--Mariano test with normal critical values. Wrong
+sign: share of the significant window results, of each kind, whose sign is
+opposite to that of the mean over all other days. EB certifies: share for
+which the one-sided 95\% bound of Proposition~\ref{prop:es-one-sided}
+certifies that the less conservative model was worse on its own days, with
+the outcome floored at twice the more conservative ES; untuned sequence in
+windows, tuned sequence over the full period.}
+\label{tab:es}
+\input{tab_es.tex}
+\end{table}

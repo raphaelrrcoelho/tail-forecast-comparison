@@ -1,0 +1,7 @@
+# Versions used to produce and check the results (Python 3.14.7)
+numpy==2.5.4
+scipy==1.18.1
+pandas==3.1.0
+matplotlib==3.11.2
+arch==8.0.0
+yfinance==1.7.0

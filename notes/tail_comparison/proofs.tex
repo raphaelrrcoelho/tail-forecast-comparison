@@ -1,0 +1,224 @@
+\subsection{Proof of Lemma~\ref{lem:structure}}
+
+The distance from $y$ to $[l,u]$ is $O(y)=\max\{l-y,0,y-u\}$, and
+$\IS_\alpha=(u-l)+(2/\alpha)O$. For real numbers,
+$\min_i(x_i-z_i)\le\max_ix_i-\max_iz_i\le\max_i(x_i-z_i)$. Applying this
+to $f_t=O_A(y_t)-O_B(y_t)$, with the three terms paired in order, gives
+$m_t^-\le f_t\le m_t^+$. The distance to a set is 1-Lipschitz in the
+Hausdorff distance between sets, which for intervals equals $H_t$; hence
+$|f_t|\le H_t$, and $m_t^\pm$ are bounded in absolute value by $H_t$.
+Item~3 holds because both distances vanish. The variance bound follows from
+items~2 and~3 and the union bound.
+
+\subsection{Proof of Theorem~\ref{thm:valid}}
+
+Fix $\lambda\ge0$ and a round $t$, write $R=R^-_t$, $D=D_t$, and let
+$F_t=\exp\{\lambda(d_t-\Delta_t)-\lambda^2g(\lambda R)D^2\}$ if
+$\lambda R<1$ and $F_t=0$ otherwise. We show $\E[F_t\mid\G_t]\le1$. If
+$\lambda R\ge1$ there is nothing to prove. If $0<\lambda R<1$, apply the
+inequality $\exp\{u\xi-\psi_E(u)\xi^2\}\le1+u\xi$, where
+$\psi_E(u)=-\log(1-u)-u$, valid for $\xi\ge-1$ and $u\in[0,1)$
+\citep{fan2015exponential}, with $\xi=D/R\ge-1$ and $u=\lambda R$:
+\[
+ \exp\{\lambda D-\lambda^2g(\lambda R)D^2\}\le1+\lambda D .
+\]
+If $R=0$, then $D\ge0$ and the same inequality holds with $g(0)=1/2$,
+because $e^{x-x^2/2}\le1+x$ for $x\ge0$. Multiplying by
+$\exp\{\lambda(c_t-\Delta_t)\}$ and taking conditional expectations, with
+$\E[D\mid\G_t]=\Delta_t-c_t$,
+\[
+ \E[F_t\mid\G_t]\le\{1+\lambda(\Delta_t-c_t)\}e^{-\lambda(\Delta_t-c_t)}\le1 .
+\]
+Hence $M_t(\lambda)=\prod_{s\le t}F_s$ is a nonnegative supermartingale with
+$M_0=1$, and so is the mixture $M_t=\sum_kw_kM_t(\lambda_k)$. Ville's
+inequality \citep{ville1939etude} gives
+$\Pr(\exists t:M_t\ge2/\delta)\le\delta/2$. Since
+$t\Dbar_t=\sum_{s\le t}\Delta_s$, $M_t=\Phi_t(\Dbar_t)$, and
+$\Phi_t(\Dbar_t)<2/\delta$ implies $\Dbar_t>L_t$. The upper bound is
+symmetric, and a union bound completes the proof.
+
+\subsection{Proof of Theorem~\ref{thm:upper}}
+\label{app:upper}
+
+Write $\ell_1=\log(2K/\delta)$, $\ell_2=\log(2/\beta)$, so that
+$\ell=\ell_1+\ell_2$, and $Q_t=\sum_{s\le t}D_s^2$. Since
+$-R_s^-\le D_s\le R_s^+$, $|D_s|\le\rbar$.
+
+\paragraph{Step 1: a deterministic bound on $\bar d_t-L_t$.}
+If $\lambda_k\le1/(2\rbar)$, then $\lambda_kR_s^-\le1/2$ for every $s$, so
+the $k$th component of $\Phi_t$ is never set to zero. Every term of
+$\Phi_t$ is nonnegative, so for each such $k$,
+$\Phi_t(m)\ge K^{-1}\exp\{\lambda_kt(\bar d_t-m)-V_{k,t}\}$, which is at
+least $2/\delta$ when $m\le\bar d_t-(\ell_1+V_{k,t})/(\lambda_kt)$. Hence
+\[
+ L_t\ge\bar d_t-\rho_t,\qquad
+ \rho_t=\min_{k:\,\lambda_k\le1/(2\rbar)}\frac{\ell_1+V_{k,t}}{\lambda_kt}.
+\]
+For these $k$, $g$ being increasing, $V_{k,t}\le g(1/2)\lambda_k^2Q_t$ with
+$g(1/2)=4(\log2-1/2)<0.773$. Let $\lambda_*=\{\ell_1/(0.773\,Q_t)\}^{1/2}$
+($\lambda_*=\infty$ if $Q_t=0$), and let $\lambda_\sharp$ be the largest
+grid point not exceeding $1/(2\rbar)$. Because $\lambda_0\ge1/(4\rbar)$ and
+the grid halves down to $\lambda_{K-1}\le1/(\rbar\sqrt t)\le1/(2\rbar)$ (for
+$t\ge4$), $\lambda_\sharp\in[1/(4\rbar),1/(2\rbar)]$.
+
+If $\lambda_*\ge\lambda_\sharp$, take $\lambda_k=\lambda_\sharp$:
+\[
+ t\rho_t\le\frac{\ell_1}{\lambda_\sharp}+0.773\,\lambda_\sharp Q_t
+ \le4\rbar\ell_1+0.773\,\lambda_*Q_t
+ =4\rbar\ell_1+(0.773\,\ell_1Q_t)^{1/2}.
+\]
+If $\lambda_*<\lambda_\sharp$, note that $Q_t\le t\rbar^2$ and
+$\ell_1\ge\log4>0.773$ (as $\delta\le1/2$) give
+$\lambda_*\ge1/(\rbar\sqrt t)\ge\lambda_{K-1}$, so some grid point
+satisfies $\lambda_*/2<\lambda_k\le\lambda_*$, and
+\[
+ t\rho_t\le\frac{2\ell_1}{\lambda_*}+0.773\,\lambda_*Q_t
+ =3\,(0.773\,\ell_1Q_t)^{1/2}.
+\]
+In both cases
+\begin{equation}
+ t\rho_t\le2.64\,(\ell_1Q_t)^{1/2}+4\rbar\ell_1 .
+ \label{eq:rho}
+\end{equation}
+
+\paragraph{Step 2: the size of $Q_t$.}
+Let $Z_s=D_s^2/\rbar^2\in[0,1]$. Convexity gives $e^z\le1+(e-1)z$ on
+$[0,1]$, and $\E[Z_s\mid\G_s]\le\Pr(D_s\ne0\mid\G_s)\le\pi$, so
+\[
+ \E[e^{Z_s}\mid\G_s]\le1+(e-1)\pi\le e^{(e-1)\pi}.
+\]
+Thus $\exp\{\sum_{s\le t}Z_s-(e-1)\pi t\}$ has expectation at most one, and
+Markov's inequality gives, with probability at least $1-\beta/2$,
+\begin{equation}
+ Q_t\le\rbar^2\{(e-1)\pi t+\ell_2\}.
+ \label{eq:Q}
+\end{equation}
+
+\paragraph{Step 3: the deviation of $\bar d_t$.}
+The variables $\xi_s=\Delta_s-d_s=\E[D_s\mid\G_s]-D_s$ are martingale
+differences with $\xi_s\le R_s^++R_s^-\le2\rbar$ and
+$\sum_{s\le t}\E[\xi_s^2\mid\G_s]\le\sum_{s\le t}\E[D_s^2\mid\G_s]\le
+t\rbar^2\pi=:v$. Freedman's inequality \citep{freedman1975tail} gives
+$\Pr(\sum_{s\le t}\xi_s\ge x)\le\exp[-x^2/\{2(v+2\rbar x)\}]$. With
+$x=(2v\ell_2)^{1/2}+4\rbar\ell_2$ the right-hand side is at most
+$\beta/2$, so with probability at least $1-\beta/2$,
+\begin{equation}
+ \bar d_t\ge\Dbar_t-\Bigl(\frac{2\rbar^2\pi\ell_2}{t}\Bigr)^{1/2}
+ -\frac{4\rbar\ell_2}{t}.
+ \label{eq:freedman}
+\end{equation}
+
+\paragraph{Step 4: combination.}
+On the intersection of the events in \eqref{eq:Q} and
+\eqref{eq:freedman}, which has probability at least $1-\beta$,
+\eqref{eq:rho} and $\sqrt{a+b}\le\sqrt a+\sqrt b$,
+$\sqrt{\ell_1\ell_2}\le\ell/2$ and $\ell_1,\ell_2\le\ell$ give
+\[
+ L_t\ge\Dbar_t-\bigl\{\sqrt2+2.64\sqrt{e-1}\bigr\}
+ \Bigl(\frac{\rbar^2\pi\ell}{t}\Bigr)^{1/2}
+ -\bigl(4+1.32+4\bigr)\frac{\rbar\ell}{t}
+ \ge\Delta-4.88\Bigl(\frac{\rbar^2\pi\ell}{t}\Bigr)^{1/2}-9.32\,\frac{\rbar\ell}{t}.
+\]
+Both subtracted terms are below $\Delta/2$ under \eqref{eq:upper}, which
+proves $L_t>0$.
+
+\subsection{Proof of Theorem~\ref{thm:lower}}
+
+Write the score for level $1-\tau$ as
+$\rho_{1-\tau}(y-q)=\tau(q-y)+(y-q)_+$. Let $y=q_B$ with probability
+$\theta_j$ and $y=q_A-1$ otherwise, under $P_j$. Then
+$d=\rho_{1-\tau}(y-q_A)-\rho_{1-\tau}(y-q_B)=-\tau H+H\ind(y=q_B)$, so
+$\E_jd=H(\theta_j-\tau)$. Take $\theta_0=\tau$ and $\theta_1=\tau+\Delta/H\le2\tau$.
+Under $P_j$, $q_A$ is exceeded with probability $\theta_j$ and $q_B$ never.
+The Kullback--Leibler divergence between the two Bernoulli laws is bounded
+by their $\chi^2$ divergence,
+$\KL(P_1\|P_0)\le(\theta_1-\theta_0)^2/\{\theta_0(1-\theta_0)\}
+=\Delta^2/\{H^2\tau(1-\tau)\}$, and for product measures it is $T$ times
+this. By the Bretagnolle--Huber inequality
+\citep[Lemma~2.6]{tsybakov2009introduction}, the sum of the two error
+probabilities of any test is at least $\frac12\exp\{-T\KL(P_1\|P_0)\}$; if
+both are at most $\delta$, then $T\KL(P_1\|P_0)\ge\log\{1/(4\delta)\}$. For
+the interval version, the lower endpoint is never crossed, so
+$\IS_\alpha(I_A;y)-\IS_\alpha(I_B;y)=(2/\alpha)d=d/\tau$.
+
+\subsection{Proof of Proposition~\ref{prop:hoeffding}}
+
+Each component of the mixture is
+$\exp\{\lambda t(\bar d_t-m)-\lambda^2tr^2/8\}$ with $\lambda\ge0$. If
+$m\ge\bar d_t$, it is at most one, and so is the mixture, which therefore
+stays below $2/\delta$. If $m<\bar d_t$, maximizing over $\lambda$ bounds
+it by $\exp\{2t(\bar d_t-m)^2/r^2\}$, and so is the mixture, which
+reaches $2/\delta$ only if $\bar d_t-m\ge r\sqrt{\log(2/\delta)/(2t)}$.
+Hence $L^{\rm H}_t\le\bar d_t-r\sqrt{\log(2/\delta)/(2t)}$. With
+$r=2H/\alpha$ the radius is at least $2\Delta$ when
+$t\le H^2\log(2/\delta)/(2\alpha^2\Delta^2)$, and then $L^{\rm H}_t>0$
+requires $\bar d_t-\Delta>\Delta$, which by Chebyshev's inequality has
+probability at most $\sigma^2/(t\Delta^2)$.
+
+\subsection{Proof of Proposition~\ref{prop:dm}}
+
+On the event $N_T$ that $|\varepsilon_t|\le a$ for all $t\le T$, which has
+probability $(1-p)^T$ and depends on $(\varepsilon_t)$ only, every round
+falls inside both intervals and $d_t=c_t=-2(b-a)\sigma_t$. Then
+$\mathrm{DM}_T=-\sqrt T\bar\sigma_T/\hat s_{\sigma,T}$, where
+$\hat s_{\sigma,T}$ is the same variance estimator applied to
+$(\sigma_t)$. By independence, conditioning on $N_T$ does not change the
+law of $(\sigma_t)$. Let $q_T=\Pr(\sqrt T\bar\sigma_T/\hat
+s_{\sigma,T}>z_{1-\gamma/2})$, which depends only on the law of
+$(\sigma_t)$. The sample autocovariances satisfy
+$|\hat\gamma_k|\le\hat\gamma_0$, so the Newey--West estimator with Bartlett
+weights and lag $L_T$ satisfies $\hat s_{\sigma,T}^2\le(2L_T+1)\hat\gamma_0$,
+and $\hat\gamma_0\le T^{-1}\sum_{t\le T}\sigma_t^2$ is bounded in
+probability because $\E\sigma_t^2<\infty$. With $L_T=o(T)$, $\hat
+s_{\sigma,T}^2=o_p(T)$, while $\bar\sigma_T\to\E\sigma_1>0$ almost surely,
+so $\sqrt T\bar\sigma_T/\hat s_{\sigma,T}\to\infty$ in probability and
+$q_T\to1$. If $\sigma_t$ is constant, $\hat s_{\sigma,T}=0$ and the test
+rejects by convention.
+
+\subsection{Proof of Proposition~\ref{prop:dm-valid}}
+
+Let $Q$ agree with $P$ on $[-a,a]$ and put the remaining mass $p$ on
+$\pm(b+1)$, beyond both intervals. There $d=c+(2/\alpha)(b-a)$ with
+$c=-2(b-a)$, so $\E_Qd=2(b-a)(p/\alpha-1)\ge0$, and $A$ is not better
+under $Q$; hence $\Pr_Q(\phi\text{ declares }A\text{ better})\le\delta$. Draw
+$\varepsilon_t$ from $P$ and replace each value outside $[-a,a]$ by a draw
+from the tail of $Q$; this couples $P^T$ and $Q^T$ so that the samples
+coincide on the event $N_T$ of no miss, and the total variation distance
+between $P^T$ and $Q^T$ is at most $1-(1-p)^T\le Tp$. The bound for $\phi$
+follows. On $N_T$, which has probability $(1-p)^T$ under both laws, the
+Diebold--Mariano test declares $A$ better by the proof of
+Proposition~\ref{prop:dm}.
+
+\subsection{Proofs for Section~\ref{sec:es}}
+
+\paragraph{Lemma~\ref{lem:fz0}.}
+Item~1 is \eqref{eq:fz0}. For item~2, $D_t$ is piecewise linear in $y_t$,
+equal to zero above both VaRs; below both it has slope $\omega_{B,t}-\omega_{A,t}\le0$
+in $y_t$, so it increases as $y_t$ decreases, and its minimum is attained at
+$y_t=\min\{v_{A,t},v_{B,t}\}$ or above, where it equals
+$-\omega_{B,t}(v_{B,t}-v_{A,t})_+$ or zero. For item~3,
+$\partial w/\partial v=1/e<0$, and $\partial w/\partial e=(e-v)/e^2\le0$
+for $e\le v$. Moving from $(v_A,e_A)$ to $(v_A,e_B)$ keeps $e\le e_A\le v_A$
+and does not decrease $w$; moving on to $(v_B,e_B)$ increases $w$, strictly
+if $v_A>v_B$.
+
+\paragraph{Proposition~\ref{prop:es-one-sided}.}
+On a day in $\mathcal L$, $D_t$ is nonincreasing in $y_t$ below
+$\min\{v_{A,t},v_{B,t}\}$ by Lemma~\ref{lem:fz0}, so $\tilde d_t\le d_t$
+and $\E[\tilde d_t\mid\G_t]\le\Delta_t$. The process of the proof of
+Theorem~\ref{thm:valid}, built from $\tilde d_t$ and with factor one on days
+outside $\mathcal L$, is a nonnegative supermartingale because $\mathcal L$
+is predictable, and the argument of that theorem bounds the average of
+$\E[\tilde d_t\mid\G_t]$, hence of $\Delta_t$, from below. The statement
+for the complement is symmetric.
+
+\paragraph{Proposition~\ref{prop:es-impossible}.}
+For $\varepsilon\in(0,1)$ and $M>0$ let $P_{\varepsilon,M}$ be the
+mixture of $P_1$, with weight $1-\varepsilon$, and a point mass at $-M$,
+with weight $\varepsilon$. By
+Lemma~\ref{lem:fz0}, $d$ evaluated at $y=-M$ grows linearly in $M$ with
+slope $\omega_A-\omega_B>0$, so for $M$ large enough $\E_{P_{\varepsilon,M}}d\ge0$
+and $P_{\varepsilon,M}$ belongs to the hypothesis. The total variation
+distance between the $T$-fold products of $P_1$ and $P_{\varepsilon,M}$ is
+at most $T\varepsilon$. Hence $P_1(\phi\text{ rejects})\le\delta+T\varepsilon$
+for every $\varepsilon>0$.
